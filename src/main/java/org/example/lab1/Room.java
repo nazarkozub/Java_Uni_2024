@@ -1,6 +1,6 @@
 package org.example.lab1;
 
-public class Room {
+public class Room implements Comparable<Room> {
     private int roomNumber;
     private String type;
     private double pricePerNight;
@@ -40,16 +40,7 @@ public class Room {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        Room room = (Room) obj;
-        return roomNumber == room.roomNumber;
-    }
-
-    @Override
-    public int hashCode() {
-        return Integer.hashCode(roomNumber);
+    public int compareTo(Room other) {
+        return Integer.compare(this.roomNumber, other.roomNumber);
     }
 }
-

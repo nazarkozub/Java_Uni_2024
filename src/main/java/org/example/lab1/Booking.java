@@ -1,5 +1,8 @@
 package org.example.lab1;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+
 public class Booking {
     private String guestName;
     private Room room;
@@ -46,33 +49,19 @@ public class Booking {
                 '}';
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        Booking booking = (Booking) obj;
-        return guestName.equals(booking.guestName) && room.equals(booking.room) &&
-                startDate.equals(booking.startDate) && endDate.equals(booking.endDate);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = guestName.hashCode();
-        result = 31 * result + room.hashCode();
-        result = 31 * result + startDate.hashCode();
-        result = 31 * result + endDate.hashCode();
-        return result;
-    }
-
-    /**
-     * Патерн Builder для класу Booking.
-     */
     public static class BookingBuilder {
         private String guestName;
         private Room room;
         private String startDate;
         private String endDate;
         private double totalPrice;
+
+        // Метод для підрахунку кількості днів між двома датами
+        private long calculateNights(String startDate, String endDate) {
+            LocalDate start = LocalDate.parse(startDate);
+            LocalDate end = LocalDate.parse(endDate);
+            return ChronoUnit.DAYS.between(start, end);
+        }
 
         public BookingBuilder setGuestName(String guestName) {
             this.guestName = guestName;
@@ -94,8 +83,10 @@ public class Booking {
             return this;
         }
 
-        public BookingBuilder setTotalPrice(double totalPrice) {
-            this.totalPrice = totalPrice;
+        // Метод для автоматичного підрахунку ціни
+        public BookingBuilder calculateTotalPrice() {
+            long nights = calculateNights(this.startDate, this.endDate);
+            this.totalPrice = nights * this.room.getPricePerNight();
             return this;
         }
 
@@ -104,4 +95,3 @@ public class Booking {
         }
     }
 }
-
