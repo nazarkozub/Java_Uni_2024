@@ -1,12 +1,11 @@
 package org.example.lab1;
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class HotelApp {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         List<Room> rooms = new ArrayList<>();
         rooms.add(new Room(101, "Standard", 100.0, true));
         rooms.add(new Room(102, "Suite", 200.0, false));
@@ -18,7 +17,7 @@ public class HotelApp {
                 .setRoom(rooms.get(0))
                 .setStartDate("2024-10-01")
                 .setEndDate("2024-10-05")
-                .calculateTotalPrice()  // Автоматичний підрахунок ціни
+                .calculateTotalPrice()
                 .build());
 
         bookings.add(new Booking.BookingBuilder()
@@ -26,7 +25,7 @@ public class HotelApp {
                 .setRoom(rooms.get(1))
                 .setStartDate("2024-10-10")
                 .setEndDate("2024-10-15")
-                .calculateTotalPrice()  // Автоматичний підрахунок ціни
+                .calculateTotalPrice()
                 .build());
 
         bookings.add(new Booking.BookingBuilder()
@@ -34,41 +33,30 @@ public class HotelApp {
                 .setRoom(rooms.get(2))
                 .setStartDate("2024-12-24")
                 .setEndDate("2024-12-31")
-                .calculateTotalPrice()  // Автоматичний підрахунок ціни
+                .calculateTotalPrice()
                 .build());
 
-        // 1. Знайти всі доступні кімнати
-        List<Room> availableRooms = findAvailableRooms(rooms);
-        System.out.println("Available rooms: " + availableRooms);
+        // Серіалізація Booking у JSON, XML та YAML
+        Serializer<Booking> jsonSerializer = new JsonSerializer<>();
+        Serializer<Booking> xmlSerializer = new XmlSerializer<>();
+        Serializer<Booking> yamlSerializer = new YamlSerializer<>();
 
-        // 2. Відсортувати кімнати за номером (Comparable)
-        List<Room> sortedRooms = rooms.stream()
-                .sorted()
-                .collect(Collectors.toList());
-        System.out.println("Rooms sorted by number: " + sortedRooms);
+        // Серіалізуємо перше бронювання у файли
+        Booking bookingToSerialize = bookings.get(0);
+        jsonSerializer.serialize(bookingToSerialize, "booking.json");
+        xmlSerializer.serialize(bookingToSerialize, "booking.xml");
+        yamlSerializer.serialize(bookingToSerialize, "booking.yaml");
 
-        // 3. Відсортувати бронювання за ціною (Comparator)
-        List<Booking> sortedBookingsByPrice = bookings.stream()
-                .sorted(Comparator.comparingDouble(Booking::getTotalPrice))
-                .collect(Collectors.toList());
-        System.out.println("Bookings sorted by total price: " + sortedBookingsByPrice);
+        // Десеріалізація з JSON
+        Booking deserializedJsonBooking = jsonSerializer.deserialize("booking.json", Booking.class);
+        System.out.println("Deserialized JSON: " + deserializedJsonBooking);
 
-        // 4. Знайти бронювання за іменем гостя
-        List<Booking> bookingsForGuest = findBookingsByGuest("Kozub Nazar", bookings);
-        System.out.println("Bookings for Kozub Nazar: " + bookingsForGuest);
-    }
+        // Десеріалізація з XML
+        Booking deserializedXmlBooking = xmlSerializer.deserialize("booking.xml", Booking.class);
+        System.out.println("Deserialized XML: " + deserializedXmlBooking);
 
-    // Метод для пошуку доступних кімнат
-    public static List<Room> findAvailableRooms(List<Room> rooms) {
-        return rooms.stream()
-                .filter(Room::isAvailable)
-                .collect(Collectors.toList());
-    }
-
-    // Метод для пошуку бронювань за гостем
-    public static List<Booking> findBookingsByGuest(String guestName, List<Booking> bookings) {
-        return bookings.stream()
-                .filter(booking -> booking.getGuestName().equals(guestName))
-                .collect(Collectors.toList());
+        // Десеріалізація з YAML
+        Booking deserializedYamlBooking = yamlSerializer.deserialize("booking.yaml", Booking.class);
+        System.out.println("Deserialized YAML: " + deserializedYamlBooking);
     }
 }

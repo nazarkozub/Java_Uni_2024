@@ -1,12 +1,27 @@
 package org.example.lab1;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Room implements Comparable<Room> {
     private int roomNumber;
     private String type;
     private double pricePerNight;
+
+    @JsonProperty("available")
     private boolean isAvailable;
 
-    public Room(int roomNumber, String type, double pricePerNight, boolean isAvailable) {
+    // Конструктор за замовчуванням (необхідний для Jackson)
+    public Room() {}
+
+    // Основний конструктор з анотаціями для Jackson
+    @JsonCreator
+    public Room(
+            @JsonProperty("roomNumber") int roomNumber,
+            @JsonProperty("type") String type,
+            @JsonProperty("pricePerNight") double pricePerNight,
+            @JsonProperty("available") boolean isAvailable
+    ) {
         this.roomNumber = roomNumber;
         this.type = type;
         this.pricePerNight = pricePerNight;
@@ -40,7 +55,7 @@ public class Room implements Comparable<Room> {
     }
 
     @Override
-    public int compareTo(Room other) {
-        return Integer.compare(this.roomNumber, other.roomNumber);
+    public int compareTo(Room otherRoom) {
+        return Integer.compare(this.roomNumber, otherRoom.getRoomNumber());
     }
 }

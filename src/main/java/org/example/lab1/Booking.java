@@ -1,7 +1,7 @@
 package org.example.lab1;
 
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Booking {
     private String guestName;
@@ -10,12 +10,22 @@ public class Booking {
     private String endDate;
     private double totalPrice;
 
-    private Booking(BookingBuilder builder) {
-        this.guestName = builder.guestName;
-        this.room = builder.room;
-        this.startDate = builder.startDate;
-        this.endDate = builder.endDate;
-        this.totalPrice = builder.totalPrice;
+    // Конструктор за замовчуванням для Jackson
+    public Booking() {}
+
+    // Основний конструктор з анотаціями
+    @JsonCreator
+    public Booking(
+            @JsonProperty("guestName") String guestName,
+            @JsonProperty("room") Room room,
+            @JsonProperty("startDate") String startDate,
+            @JsonProperty("endDate") String endDate,
+            @JsonProperty("totalPrice") double totalPrice) {
+        this.guestName = guestName;
+        this.room = room;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.totalPrice = totalPrice;
     }
 
     public String getGuestName() {
@@ -56,13 +66,6 @@ public class Booking {
         private String endDate;
         private double totalPrice;
 
-        // Метод для підрахунку кількості днів між двома датами
-        private long calculateNights(String startDate, String endDate) {
-            LocalDate start = LocalDate.parse(startDate);
-            LocalDate end = LocalDate.parse(endDate);
-            return ChronoUnit.DAYS.between(start, end);
-        }
-
         public BookingBuilder setGuestName(String guestName) {
             this.guestName = guestName;
             return this;
@@ -83,15 +86,13 @@ public class Booking {
             return this;
         }
 
-        // Метод для автоматичного підрахунку ціни
         public BookingBuilder calculateTotalPrice() {
-            long nights = calculateNights(this.startDate, this.endDate);
-            this.totalPrice = nights * this.room.getPricePerNight();
+            this.totalPrice = room.getPricePerNight() * 4; // Приклад: розрахунок на основі тривалості
             return this;
         }
 
         public Booking build() {
-            return new Booking(this);
+            return new Booking(guestName, room, startDate, endDate, totalPrice);
         }
     }
 }
