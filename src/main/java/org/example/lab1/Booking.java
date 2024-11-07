@@ -3,6 +3,10 @@ package org.example.lab1;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
+
 public class Booking {
     private String guestName;
     private Room room;
@@ -10,10 +14,8 @@ public class Booking {
     private String endDate;
     private double totalPrice;
 
-    // Конструктор за замовчуванням для Jackson
     public Booking() {}
 
-    // Основний конструктор з анотаціями
     @JsonCreator
     public Booking(
             @JsonProperty("guestName") String guestName,
@@ -60,6 +62,7 @@ public class Booking {
     }
 
     public static class BookingBuilder {
+        private static final Pattern NAME_PATTERN = Pattern.compile("^[A-Za-z\\s]+$");
         private String guestName;
         private Room room;
         private String startDate;
@@ -87,11 +90,35 @@ public class Booking {
         }
 
         public BookingBuilder calculateTotalPrice() {
-            this.totalPrice = room.getPricePerNight() * 4; // Приклад: розрахунок на основі тривалості
+            if (room != null) {
+                this.totalPrice = room.getPricePerNight() * 4; // Приклад розрахунку
+            }
             return this;
         }
 
         public Booking build() {
+            List<String> validationErrors = new ArrayList<>();
+
+            if (guestName == null || !NAME_PATTERN.matcher(guestName).matches()) {
+                validationErrors.add("guestName: \"" + guestName + "\" - ім'я повинно містити тільки літери та пробіли");
+            }
+
+            if (room == null) {
+                validationErrors.add("room: null - номер кімнати не може бути порожнім");
+            }
+
+            if (startDate == null || startDate.trim().isEmpty()) {
+                validationErrors.add("startDate: \"" + startDate + "\" - дата початку не може бути порожньою");
+            }
+
+            if (endDate == null || endDate.trim().isEmpty()) {
+                validationErrors.add("endDate: \"" + endDate + "\" - дата закінчення не може бути порожньою");
+            }
+
+            if (!validationErrors.isEmpty()) {
+                throw new IllegalArgumentException("Помилки валідації: " + String.join("; ", validationErrors));
+            }
+
             return new Booking(guestName, room, startDate, endDate, totalPrice);
         }
     }
